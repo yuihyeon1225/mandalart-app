@@ -1,0 +1,902 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>만다라트 계획표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700&display=swap">
+<style>
+/* 9x9 sheet as one grid; block edges drawn heavier, colors carried over from the Excel plan */
+:root, :root:not([data-theme="light"]), :root[data-theme] {
+  --bg: #F3F4F7; --fg: #22252C; --muted: #646A78; --cell: #FFFFFF;
+  --line: #CDD1DA; --edge: #3B3F4A; --accent: #2F63D6; --accent-soft: rgba(47,99,214,.12);
+  --core-bg: #3B3F4A; --core-fg: #FFFFFF;
+  --k0: #FDE2E2; --k1: #FDEBD3; --k2: #FFF6CC; --k3: #E3F4DC; --k5: #DCEFF5; --k6: #E2E6FA; --k7: #EEE2F7; --k8: #F1E9DF;
+  --f-display: "Gowun Batang", "Batang", serif;
+  --f-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #17191E; --fg: #E8EAEF; --muted: #9AA1AF; --cell: #1F2228;
+  --line: #343842; --edge: #8A90A0; --accent: #7EA4FF; --accent-soft: rgba(126,164,255,.16);
+  --core-bg: #E8E6E0; --core-fg: #1B1D22;
+  --k0: #4A3034; --k1: #4A3A2A; --k2: #484223; --k3: #2E4229; --k5: #26404A; --k6: #2E3452; --k7: #3E2F4D; --k8: #463C31;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #17191E; --fg: #E8EAEF; --muted: #9AA1AF; --cell: #1F2228;
+  --line: #343842; --edge: #8A90A0; --accent: #7EA4FF; --accent-soft: rgba(126,164,255,.16);
+  --core-bg: #E8E6E0; --core-fg: #1B1D22;
+  --k0: #4A3034; --k1: #4A3A2A; --k2: #484223; --k3: #2E4229; --k5: #26404A; --k6: #2E3452; --k7: #3E2F4D; --k8: #463C31;
+  color-scheme: dark }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); word-spacing: 0.1em; }
+.fld, button { word-spacing: 0.1em; }
+.wrap { max-width: 1000px; margin: 0 auto; padding: 28px 16px 40px; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+h1 { font-family: var(--f-display); font-size: 1.75rem; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.period { font-family: var(--f-body); font-size: 0.95rem; font-weight: 600; color: var(--accent); margin-left: 8px; vertical-align: middle; }
+.sub { margin: 6px 0 0; color: var(--muted); font-size: 0.86rem; }
+.tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.stats { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.status { font-size: 0.78rem; color: var(--muted); min-width: 5.5em; text-align: right; }
+.status[data-s="error"] { color: #C2410C; }
+button.mode { font: inherit; font-size: 0.84rem; padding: 7px 14px; border-radius: 6px; border: 1px solid var(--edge);
+  background: var(--cell); color: var(--fg); cursor: pointer; }
+button.mode[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.mode:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { font-size: 0.8rem; color: var(--accent); margin: -8px 0 0; }
+
+.scroller { overflow-x: auto; }
+.grid { min-width: 720px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); grid-auto-rows: minmax(78px, auto);
+  border-left: 2px solid var(--edge); border-top: 2px solid var(--edge); background: var(--cell); }
+.cell { position: relative; display: flex; align-items: center; justify-content: center; padding: 6px;
+  border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--cell); min-width: 0; }
+.cell.er { border-right: 2px solid var(--edge); }
+.cell.eb { border-bottom: 2px solid var(--edge); }
+.ed { width: 100%; text-align: center; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 0.74rem; line-height: 1.4; outline: none; min-height: 1.4em; }
+.cell:focus-within { box-shadow: inset 0 0 0 2px var(--accent); }
+.sub-goal .ed, .link .ed { font-weight: 600; font-size: 0.84rem; }
+.core { background: var(--core-bg); }
+.core .ed { color: var(--core-fg); font-weight: 600; font-size: 0.82rem; }
+.ed:empty::before { content: attr(data-ph); color: var(--muted); opacity: .7; font-weight: 400; }
+.core .ed:empty::before { color: var(--core-fg); }
+.link { cursor: default; }
+.k0 { background: var(--k0); } .k1 { background: var(--k1); } .k2 { background: var(--k2); } .k3 { background: var(--k3); }
+.k5 { background: var(--k5); } .k6 { background: var(--k6); } .k7 { background: var(--k7); } .k8 { background: var(--k8); }
+.cell.marked { box-shadow: inset 0 0 0 3px var(--accent); }
+.cell.marked .ed { font-weight: 600; }
+.cell.marked::after { content: "시작"; position: absolute; top: 3px; right: 4px; font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-soft); padding: 0 4px; border-radius: 3px; }
+body.marking .cell.act, body.marking .cell.sub-goal { cursor: pointer; }
+body.marking .cell.act:hover { background: var(--accent-soft); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+.tab { flex: 0 0 auto; }
+@media (max-width: 520px) { .tab { padding: 8px 10px; } .wrap { padding-top: 16px; } h1 { font-size: 1.4rem; } }
+.tab { font: inherit; font-size: 0.9rem; padding: 8px 16px; border: 0; background: none; color: var(--muted); cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--fg); font-weight: 600; border-bottom-color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.view { display: grid; gap: 18px; }
+.view[hidden] { display: none !important; }
+
+.summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.sum { background: var(--cell); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; display: grid; gap: 2px; }
+.sum b { font-size: 0.78rem; color: var(--muted); font-weight: 600; letter-spacing: 0.02em; }
+.sum span { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sum small { font-size: 0.74rem; color: var(--muted); }
+.note { font-size: 0.8rem; color: var(--muted); margin: 0; line-height: 1.6; }
+.group { display: grid; gap: 6px; }
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border-bottom: 2px solid var(--edge); padding-bottom: 4px; }
+.group-head h2 { font-size: 1rem; margin: 0; }
+.group-head h2 small { font-size: 0.78rem; color: var(--muted); font-weight: 400; margin-left: 6px; }
+.group-head .tot { font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 10px; align-items: center;
+  padding: 8px 4px; border-bottom: 1px solid var(--line); }
+.dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--line); }
+.what { min-width: 0; display: grid; gap: 1px; }
+.what .cat { font-size: 0.72rem; color: var(--muted); }
+.what .act { font-size: 0.88rem; overflow-wrap: anywhere; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.chip { font-size: 0.72rem; padding: 2px 8px; border-radius: 10px; background: var(--bg); border: 1px solid var(--line); white-space: nowrap;
+  font-variant-numeric: tabular-nums; }
+.chip.time { border-color: var(--edge); }
+.chip.big { border-color: var(--accent); color: var(--accent); }
+.row.marked .act { font-weight: 600; }
+@media (max-width: 520px) { .row { grid-template-columns: 10px minmax(0, 1fr); } .chips { grid-column: 2; justify-content: flex-start; } }
+
+.ck-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; border: 1px solid var(--edge); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.88rem; padding: 8px 16px; min-height: 40px; border: 0; background: var(--cell); color: var(--fg); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--edge); }
+.seg button[aria-pressed="true"] { background: var(--edge); color: var(--cell); font-weight: 600; }
+.navs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.navs button { font: inherit; font-size: 0.82rem; min-height: 40px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--cell); color: var(--fg); cursor: pointer; }
+.navs .lbl { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 9.5em; text-align: center; }
+.seg button:focus-visible, .navs button:focus-visible, .box:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ck-prog { display: flex; align-items: center; gap: 12px; font-size: 0.86rem; color: var(--muted); margin: 0; }
+.bar { flex: 1; height: 8px; border-radius: 4px; background: var(--line); overflow: hidden; max-width: 320px; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+.ck-row { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 12px; align-items: center; min-height: 52px;
+  padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.ck-row .what { cursor: pointer; gap: 3px; }
+.ck-row .what.free { cursor: default; }
+.ck-row.done .act { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.boxes { display: flex; gap: 6px; align-items: flex-start; }
+.bx { display: grid; justify-items: center; gap: 2px; }
+.bx small { font-size: 0.66rem; color: var(--muted); }
+.box { width: 36px; height: 36px; border-radius: 8px; border: 2px solid var(--edge); background: var(--cell); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; padding: 0; }
+.box[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
+.box[aria-pressed="true"]::after { content: ""; width: 8px; height: 15px; border: solid #fff; border-width: 0 3px 3px 0; transform: translateY(-2px) rotate(45deg); }
+.box:disabled { cursor: default; opacity: .6; }
+.fld { font: inherit; font-size: 16px; width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px;
+  background: var(--cell); color: var(--fg); resize: vertical; }
+.fld:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: var(--accent); }
+.fld::placeholder { color: var(--muted); opacity: .8; }
+.meals { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); gap: 8px 10px; align-items: center; padding: 6px 4px; }
+.meals label { font-size: 0.84rem; color: var(--muted); }
+.inline { display: flex; align-items: center; gap: 8px; padding: 6px 4px; }
+.inline .fld { max-width: 8em; }
+.cnt { display: flex; flex-wrap: wrap; gap: 10px 16px; padding: 6px 4px; }
+.cnt label { display: grid; gap: 3px; font-size: 0.84rem; }
+.cnt .fld { width: 5em; }
+.cnt small { font-size: 0.7rem; color: var(--muted); }
+.fl { display: grid; gap: 4px; padding: 4px; }
+.fl > span { font-size: 0.8rem; color: var(--muted); }
+.logs { display: grid; }
+.log { display: grid; gap: 2px; padding: 8px 4px; border-bottom: 1px solid var(--line); font-size: 0.82rem; overflow-wrap: anywhere; }
+.log b { font-size: 0.8rem; }
+.log span { color: var(--fg); }
+.log .lc { color: var(--muted); }
+details.fold-group > summary { cursor: pointer; list-style: none; }
+details.fold-group > summary::-webkit-details-marker { display: none; }
+details.fold-group > summary h2::before { content: "+"; display: inline-block; width: 1em; color: var(--muted); }
+details.fold-group[open] > summary h2::before { content: "−"; }
+details.fold-group ul { margin: 4px 0 0; padding: 0 4px 0 1.4em; line-height: 1.8; font-size: 0.84rem; }
+details.fold-group[open] { gap: 6px; }
+details.fold { padding: 4px; font-size: 0.82rem; color: var(--muted); }
+details.fold summary { cursor: pointer; padding: 6px 0; }
+details.fold ul { margin: 4px 0 0; padding-left: 1.2em; line-height: 1.7; }
+.wk-wrap { overflow-x: auto; }
+.wk { border-collapse: collapse; width: 100%; min-width: 420px; font-size: 0.8rem; }
+.wk th, .wk td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: center; }
+.wk th:first-child, .wk td:first-child { text-align: left; }
+.wk th { color: var(--muted); font-weight: 600; font-size: 0.74rem; }
+.wk td:first-child { overflow-wrap: anywhere; }
+.sq { display: inline-block; width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--edge); vertical-align: middle; }
+.sq.on { background: var(--accent); border-color: var(--accent); }
+.wk .rate { font-variant-numeric: tabular-nums; color: var(--muted); }
+
+.guide { color: var(--muted); font-size: 0.8rem; line-height: 1.7; }
+.guide h2 { font-size: 0.82rem; color: var(--fg); margin: 0 0 4px; letter-spacing: 0.02em; }
+.guide ol { margin: 0; padding-left: 1.2em; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<style>
+/* draft: night notebook, always dark; one gothic face throughout */
+:root, :root:not([data-theme="light"]), :root[data-theme] {
+  --bg: #1B1713; --fg: #E4CFA8; --muted: #9A8768; --cell: #1B1713;
+  --line: #3A3128; --edge: #E4CFA8; --accent: #E08A3C; --accent-soft: rgba(224,138,60,.14);
+  --ink: #EFDDB8; --rule: #2E2720;
+  --core-bg: #E4CFA8; --core-fg: #1B1713;
+  --k0: #3A2A24; --k1: #3B3022; --k2: #38331F; --k3: #2C3325; --k5: #263130; --k6: #2C2C36; --k7: #352A31; --k8: #382F25;
+  --f-display: "Gothic A1", "Malgun Gothic", sans-serif;
+  --f-body: "Gothic A1", "Malgun Gothic", sans-serif;
+  --f-hand: "Gothic A1", "Malgun Gothic", sans-serif;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); word-spacing: 0.1em; }
+.fld, button { word-spacing: 0.1em; }
+.wrap { max-width: 640px; gap: 22px; }
+h1 { font-weight: 700; font-size: 1.5rem; letter-spacing: -0.02em; }
+.period { font-family: var(--f-body); font-weight: 400; color: var(--muted); font-size: 0.9rem; }
+
+/* tabs: plain words, a short ink underline under the open one */
+.tabs { border-bottom: 0; gap: 18px; }
+.tab { padding: 4px 0; font-size: 0.95rem; color: var(--muted); border-bottom: 2px solid transparent; }
+.tab[aria-selected="true"] { color: var(--fg); font-weight: 600; border-bottom-color: var(--accent); }
+
+/* day/week/month + date: no boxed buttons */
+.ck-bar { flex-direction: column; align-items: stretch; gap: 14px; }
+.seg { border: 0; gap: 14px; border-radius: 0; }
+.seg button { background: none; padding: 0; min-height: 32px; font-size: 0.9rem; color: var(--muted); }
+.seg button + button { border-left: 0; }
+.seg button[aria-pressed="true"] { background: none; color: var(--fg); font-weight: 600; text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 6px; text-decoration-thickness: 2px; }
+.navs { display: grid; grid-template-columns: 40px 1fr 40px auto; align-items: center; gap: 4px; }
+.navs button { border: 0; background: none; color: var(--muted); font-size: 0; min-height: 40px; padding: 0; }
+.navs #ckPrev::before { content: "\2039"; font-size: 1.8rem; }
+.navs #ckNext::before { content: "\203A"; font-size: 1.8rem; }
+.navs #ckToday { font-size: 0.82rem; padding: 0 2px; }
+.navs .lbl { order: 0; font-size: 1.45rem; font-weight: 700; text-align: center; min-width: 0; letter-spacing: -0.02em; }
+
+/* progress as a number, not a bar */
+.ck-prog { justify-content: space-between; font-size: 0.82rem; }
+.ck-prog .bar { display: none; }
+#ckProgText { font-variant-numeric: tabular-nums; }
+
+/* sections ruled like a notebook */
+#ckBody { gap: 26px; }
+.group { gap: 0; }
+.group-head { border-bottom: 1px solid var(--fg); padding-bottom: 6px; }
+.group-head h2 { font-size: 1.02rem; font-weight: 700; }
+.ck-row { grid-template-columns: minmax(0, 1fr) auto; border-bottom: 1px solid var(--rule); min-height: 56px; padding: 8px 0; }
+.ck-row .dot, .row .dot { display: none; }
+.what .cat { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.02em; }
+.what .act { font-size: 0.98rem; }
+.ck-row.done .act { color: var(--muted); text-decoration: none; }
+
+/* check: a thin circle; checked turns amber */
+.box { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--muted); background: none; }
+.box[aria-pressed="true"] { background: none; border: 2px solid var(--accent); }
+.box[aria-pressed="true"]::after { border-color: var(--accent); width: 7px; height: 14px; border-width: 0 2.5px 2.5px 0; }
+.bx small { font-size: 0.68rem; }
+
+/* what I write: typed entries on ruled lines */
+.fld { font-family: var(--f-hand); font-size: 16px; line-height: 32px; color: var(--ink); background: none;
+  border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 0 2px; }
+textarea.fld { border-bottom: 0; resize: none; min-height: 96px;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 31px, var(--line) 31px, var(--line) 32px);
+  background-attachment: local; }
+.fld:focus { outline: none; border-color: var(--accent); }
+.meals { grid-template-columns: 2.8em minmax(0, 1fr); padding: 4px 0; gap: 4px 10px; }
+.meals label { font-size: 0.86rem; }
+.fl { padding: 6px 0 0; }
+.inline { padding: 8px 0; }
+.inline .fld { max-width: 5em; text-align: right; }
+
+.log { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.log span { font-family: var(--f-hand); font-size: 14px; color: var(--ink); line-height: 1.3; }
+.log b { font-weight: 600; }
+details.fold-group > summary h2::before { color: var(--accent); }
+.wk th, .wk td { border-bottom-color: var(--rule); }
+.sq { border-radius: 50%; border-color: var(--muted); }
+.sq.on { background: var(--accent); border-color: var(--accent); }
+
+/* shared header bits */
+button.mode { border-radius: 0; background: none; border: 1px solid var(--fg); }
+.sum { border-radius: 0; background: none; border: 0; border-top: 1px solid var(--fg); padding: 8px 0; }
+.chip { border-radius: 0; background: none; border: 0; padding: 0; color: var(--muted); }
+.row { grid-template-columns: minmax(0, 1fr) auto; border-bottom-color: var(--rule); }
+.grid { border-color: var(--fg); }
+.cell.er { border-right-color: var(--fg); } .cell.eb { border-bottom-color: var(--fg); }
+</style>
+
+<style>
+#view-sync .group { gap: 10px; }
+.sync-row { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
+.sbtn { font: inherit; font-size: 0.88rem; min-height: 40px; padding: 0 14px; display: inline-flex; align-items: center;
+  border: 1px solid var(--line); border-radius: 0; background: none; color: var(--fg); cursor: pointer; }
+.sbtn.main { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.sbtn:disabled { opacity: .5; }
+.fld.code { font-size: 12px; line-height: 1.5; word-break: break-all; border: 1px solid var(--line); background: none; padding: 8px; min-height: 0; }
+</style>
+<main class="wrap">
+  <header>
+    <div>
+      <h1>만다라트 계획표 <span class="period" id="period"></span></h1>
+    </div>
+    <div class="tools">
+      <span class="stats" id="stats"></span>
+      <button class="mode" id="markBtn" type="button" aria-pressed="false">시작 항목 표시</button>
+      <span class="status" id="status" data-s="loading">불러오는 중</span>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist">
+    <button class="tab" id="tab-check" type="button" role="tab" aria-selected="true">체크</button>
+    <button class="tab" id="tab-grid" type="button" role="tab" aria-selected="false">만다라트</button>
+    <button class="tab" id="tab-list" type="button" role="tab" aria-selected="false">10월 목록</button>
+    <button class="tab" id="tab-sync" type="button" role="tab" aria-selected="false">동기화</button>
+  </nav>
+  <section class="view" id="view-check" hidden>
+    <div class="ck-bar">
+      <div class="seg" aria-label="보기 단위">
+        <button type="button" data-mode="day" aria-pressed="true">일일</button>
+        <button type="button" data-mode="week" aria-pressed="false">주간</button>
+        <button type="button" data-mode="month" aria-pressed="false">월간</button>
+      </div>
+      <div class="navs">
+        <button type="button" id="ckPrev">이전</button>
+        <span class="lbl" id="ckLabel"></span>
+        <button type="button" id="ckNext">다음</button>
+        <button type="button" id="ckToday">오늘</button>
+      </div>
+    </div>
+    <p class="ck-prog"><span id="ckProgText"></span><span class="bar"><i id="ckBar" style="width:0%"></i></span><span id="ckSave"></span></p>
+    <div class="view" id="ckBody"></div>
+  </section>
+  <section class="view" id="view-sync" hidden>
+    <section class="group">
+      <div class="group-head"><h2 id="syncOutTitle">보내기</h2></div>
+      <div class="sync-row"><button class="sbtn" type="button" id="syncMake">코드 만들기</button><button class="sbtn" type="button" id="syncShare" hidden>파일로 공유</button></div>
+      <textarea class="fld code" id="syncOut" rows="3" readonly hidden></textarea>
+      <p class="note" id="syncOutMsg"></p>
+    </section>
+    <section class="group">
+      <div class="group-head"><h2 id="syncInTitle">받기</h2></div>
+      <div class="sync-row"><button class="sbtn" type="button" id="syncPaste">붙여넣기</button><label class="sbtn">파일 열기<input type="file" id="syncFile" accept=".json,application/json,text/plain" hidden></label><button class="sbtn" type="button" id="syncCheck">확인</button></div>
+      <textarea class="fld code" id="syncIn" rows="3"></textarea>
+      <p class="note" id="syncInMsg"></p>
+      <div class="sync-row"><button class="sbtn main" type="button" id="syncApply" hidden>적용</button></div>
+    </section>
+  </section>
+  <section class="view" id="view-list" hidden>
+    <p class="note" id="listNote">목록을 불러오는 중입니다.</p>
+    <div class="summary" id="summary"></div>
+    <div class="view" id="list"></div>
+  </section>
+  <section class="view" id="view-grid">
+  <p class="hint" id="hint" hidden></p>
+  <div class="scroller"><div class="grid" id="grid" role="grid" aria-label="만다라트 9×9 표"></div></div>
+  </section>
+</main>
+
+<script>
+(function () {
+  const grid = document.getElementById('grid');
+  const statusEl = document.getElementById('status');
+  const statsEl = document.getElementById('stats');
+  const markBtn = document.getElementById('markBtn');
+  const hint = document.getElementById('hint');
+  const cells = {};   // id -> {el, ed, kind, src}
+  const local = {};   // id -> {text, mark}
+  const timers = {}, busy = {}, again = {};
+  let db = null, writable = true, marking = false;
+  const plain = (() => { const d = document.createElement('div'); d.contentEditable = 'plaintext-only'; return d.contentEditable === 'plaintext-only'; })();
+
+  const cid = (r, c) => 'r' + r + 'c' + c;
+  function kindOf(r, c) {
+    const br = (r - 1) / 3 | 0, bc = (c - 1) / 3 | 0, ir = (r - 1) % 3, ic = (c - 1) % 3;
+    if (br === 1 && bc === 1) return (ir === 1 && ic === 1) ? { k: 'core' } : { k: 'sub-goal', color: ir * 3 + ic };
+    if (ir === 1 && ic === 1) return { k: 'link', color: br * 3 + bc, src: cid(4 + br, 4 + bc) };
+    return { k: 'act' };
+  }
+  const getText = ed => ed.innerText.replace(/\n+$/, '');
+
+  for (let r = 1; r <= 9; r++) for (let c = 1; c <= 9; c++) {
+    const id = cid(r, c), info = kindOf(r, c);
+    const el = document.createElement('div');
+    el.className = 'cell ' + info.k + (info.color != null ? ' k' + info.color : '') + (c % 3 === 0 ? ' er' : '') + (r % 3 === 0 ? ' eb' : '');
+    el.setAttribute('role', 'gridcell');
+    const ed = document.createElement('div');
+    ed.className = 'ed';
+    if (info.k !== 'link') {
+      ed.contentEditable = plain ? 'plaintext-only' : 'true';
+      ed.spellcheck = false;
+      ed.id = 'cell-' + id;
+      if (info.k === 'core') ed.dataset.ph = '핵심 목표';
+      if (info.k === 'sub-goal') ed.dataset.ph = '세부 목표';
+      ed.addEventListener('input', () => {
+        local[id] = Object.assign({ text: '', mark: false }, local[id], { text: getText(ed) });
+        if (info.k === 'sub-goal') refreshLinks();
+        updateStats(); schedule(id);
+      });
+      ed.addEventListener('blur', () => { if (timers[id]) { clearTimeout(timers[id]); timers[id] = null; save(id); } });
+      if (!plain) ed.addEventListener('paste', e => {
+        e.preventDefault();
+        document.execCommand('insertText', false, (e.clipboardData || window.clipboardData).getData('text/plain'));
+      });
+      el.addEventListener('click', e => {
+        if (marking && (info.k === 'act' || info.k === 'sub-goal')) { e.preventDefault(); toggleMark(id); return; }
+        if (e.target === el) { ed.focus(); placeEnd(ed); }
+      });
+    }
+    el.appendChild(ed);
+    grid.appendChild(el);
+    cells[id] = { el, ed, kind: info.k, src: info.src };
+  }
+
+  function placeEnd(ed) {
+    const range = document.createRange(); range.selectNodeContents(ed); range.collapse(false);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+  }
+  function refreshLinks() {
+    for (const id in cells) if (cells[id].kind === 'link') {
+      const t = (local[cells[id].src] || {}).text || '';
+      if (cells[id].ed.textContent !== t) cells[id].ed.textContent = t;
+    }
+  }
+  function updateStats() {
+    let filled = 0, marked = 0;
+    for (const id in cells) {
+      const v = local[id] || {};
+      if (cells[id].kind === 'act' && (v.text || '').trim()) filled++;
+      if (v.mark) marked++;
+    }
+    statsEl.textContent = '실천 칸 ' + filled + '/64 · 시작 항목 ' + marked + '개';
+  }
+  function setStatus(s) {
+    const label = { loading: '불러오는 중', saving: '저장 중', saved: '저장됨', error: '저장 실패: 연결 확인', readonly: '읽기 전용', offline: '저장 불가' }[s];
+    statusEl.dataset.s = s; statusEl.textContent = label;
+  }
+  function applyMark(id) {
+    cells[id].el.classList.toggle('marked', !!(local[id] && local[id].mark));
+  }
+  function toggleMark(id) {
+    if (!writable) return;
+    local[id] = Object.assign({ text: '', mark: false }, local[id]);
+    local[id].mark = !local[id].mark;
+    applyMark(id); updateStats(); save(id);
+  }
+  markBtn.addEventListener('click', () => {
+    marking = !marking;
+    markBtn.setAttribute('aria-pressed', String(marking));
+    markBtn.textContent = marking ? '표시 끝내기' : '시작 항목 표시';
+    hint.hidden = !marking;
+    document.body.classList.toggle('marking', marking);
+    for (const id in cells) if (cells[id].kind !== 'link')
+      cells[id].ed.contentEditable = (marking || !writable) ? 'false' : (plain ? 'plaintext-only' : 'true');
+  });
+
+  function schedule(id) {
+    if (!db || !writable) return;
+    clearTimeout(timers[id]);
+    timers[id] = setTimeout(() => { timers[id] = null; save(id); }, 700);
+    setStatus('saving');
+  }
+  async function save(id) {
+    if (!db || !writable) return;
+    if (busy[id]) { again[id] = true; return; }
+    busy[id] = true; setStatus('saving');
+    const v = local[id] || { text: '', mark: false };
+    try {
+      await db.collection('cells').doc(id).set({ text: v.text || '', mark: !!v.mark, _t: Date.now() });
+    } catch (e) {
+      busy[id] = false;
+      if (e && (e.code === 'invalid_argument')) { makeReadOnly(); return; }
+      setStatus('error'); return;
+    }
+    busy[id] = false;
+    if (again[id]) { again[id] = false; save(id); return; }
+    if (!Object.values(busy).some(Boolean) && !Object.values(timers).some(Boolean)) setStatus('saved');
+  }
+  function makeReadOnly() {
+    writable = false; setStatus('readonly'); markBtn.hidden = true;
+    for (const id in cells) if (cells[id].kind !== 'link') cells[id].ed.contentEditable = 'false';
+    renderCheck();
+  }
+
+  function applySnapshot(snap) {
+    for (const d of snap.docs) {
+      const id = d.id; if (!cells[id]) continue;
+      const data = d.data() || {};
+      const editing = document.activeElement === cells[id].ed || timers[id] || busy[id];
+      if (!editing) {
+        local[id] = { text: String(data.text || ''), mark: !!data.mark };
+        if (cells[id].kind !== 'link' && getText(cells[id].ed) !== local[id].text) cells[id].ed.textContent = local[id].text;
+      } else {
+        local[id] = Object.assign({}, local[id], { mark: local[id] && 'mark' in local[id] ? local[id].mark : !!data.mark });
+      }
+      applyMark(id);
+    }
+    refreshLinks(); updateStats();
+    if (statusEl.dataset.s === 'loading') setStatus(writable ? 'saved' : 'readonly');
+  }
+
+  // ---- tabs ----
+  const tabs = { grid: document.getElementById('tab-grid'), list: document.getElementById('tab-list'), check: document.getElementById('tab-check'), sync: document.getElementById('tab-sync') };
+  const views = { grid: document.getElementById('view-grid'), list: document.getElementById('view-list'), check: document.getElementById('view-check'), sync: document.getElementById('view-sync') };
+  const tools = document.querySelector('.tools');
+  function show(name) {
+    for (const k in tabs) { tabs[k].setAttribute('aria-selected', String(k === name)); views[k].hidden = k !== name; }
+    tools.hidden = name !== 'grid';
+    try { localStorage.setItem('mandalart-tab', name); } catch (_) {}
+  }
+  tabs.grid.addEventListener('click', () => show('grid'));
+  tabs.list.addEventListener('click', () => show('list'));
+  tabs.sync.addEventListener('click', () => show('sync'));
+  tabs.check.addEventListener('click', () => show('check'));
+  let first = 'check';
+  try { const t = localStorage.getItem('mandalart-tab'); if (t === 'list' || t === 'grid') first = t; } catch (_) {}
+  show(first);
+
+  // ---- October list (a separate snapshot, not linked to the grid) ----
+  const SLOTS = [
+    ['morning', '아침', '기상부터 출근 전까지'],
+    ['work', '업무 중', '회사에서 지키는 규칙. 시간이 따로 들지 않습니다'],
+    ['evening', '퇴근 후 저녁', '집에 와서 자기 전 마무리 전까지'],
+    ['night', '자기 전', '잠들기 전 마무리'],
+    ['weekend', '주말', '토·일에 몰아서'],
+    ['anytime', '상황이 올 때', '정해진 시간 없이 그때그때'],
+    ['once', '이번 달 한 번', '한 번 하면 끝나는 일']
+  ];
+  function fmt(m) {
+    if (m == null) return '';
+    if (m === 0) return '시간 안 듦';
+    const h = Math.floor(m / 60), r = Math.round(m % 60);
+    return '약 ' + (h ? h + '시간' + (r ? ' ' + r + '분' : '') : r + '분');
+  }
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  // ---- check tab (2026-10-17: weekday bundles + records, weekend checks + review) ----
+  // plan comes from routine/2026-10; records live in checks/{d|w|m}{date} as {v: {key: 0|1}, ...fields}
+  let plan = null, stale = false;
+  const docs = {}, pend = {}, wBusy = {}, wAgain = {};
+  let ckMode = 'day', ckDate = new Date();
+  const ckBody = document.getElementById('ckBody'), ckSave = document.getElementById('ckSave');
+  const WD = ['일', '월', '화', '수', '목', '금', '토'];
+  const pad = n => String(n).padStart(2, '0');
+  const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const monday = d => addDays(d, -((d.getDay() + 6) % 7));
+  const md = d => (d.getMonth() + 1) + '/' + d.getDate();
+  function ckKey(mode, d) {
+    if (mode === 'day') return 'd' + ymd(d);
+    if (mode === 'week') return 'w' + ymd(monday(d));
+    return 'm' + ymd(d).slice(0, 7);
+  }
+  function ckLabel() {
+    const d = ckDate;
+    if (ckMode === 'day') return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + WD[d.getDay()] + ')';
+    if (ckMode === 'week') { const m = monday(d); return md(m) + ' ~ ' + md(addDays(m, 6)); }
+    return d.getFullYear() + '년 ' + (d.getMonth() + 1) + '월';
+  }
+  const docOf = key => docs[key] || {};
+  const vOf = (key, k) => ((docOf(key).v || {})[k]) || 0;
+  const getPath = (o, p) => p.split('.').reduce((a, k) => a == null ? a : a[k], o);
+  function putPath(o, p, val) {
+    const ks = p.split('.'); let a = o;
+    for (const k of ks.slice(0, -1)) a = a[k] = (a[k] && typeof a[k] === 'object') ? a[k] : {};
+    a[ks[ks.length - 1]] = val;
+  }
+  function edit(key, fn, rerender) {
+    if (!db || !writable) return;
+    const d = JSON.parse(JSON.stringify(docOf(key)));
+    if (!d.v || typeof d.v !== 'object') d.v = {};
+    fn(d); d._t = Date.now(); docs[key] = d;
+    if (rerender) renderCheck();
+    clearTimeout(pend[key]); ckSave.textContent = '저장 중';
+    pend[key] = setTimeout(() => { pend[key] = null; writeDoc(key); }, rerender ? 300 : 700);
+  }
+  async function writeDoc(key) {
+    if (wBusy[key]) { wAgain[key] = true; return; }
+    wBusy[key] = true;
+    try { await db.collection('checks').doc(key).set(docs[key]); ckSave.textContent = '저장됨'; }
+    catch (e) { ckSave.textContent = '저장 실패: 연결 확인'; }
+    wBusy[key] = false;
+    if (wAgain[key]) { wAgain[key] = false; writeDoc(key); }
+  }
+  function flush() { for (const k in pend) if (pend[k]) { clearTimeout(pend[k]); pend[k] = null; writeDoc(k); } }
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush(); });
+  const typing = () => { const a = document.activeElement; return !!a && ckBody.contains(a) && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA'); };
+  function applyChecks(snap) {
+    for (const d of snap.docs) { if (pend[d.id] || wBusy[d.id]) continue; docs[d.id] = d.data() || {}; }
+    if (typing()) stale = true; else renderCheck();
+  }
+  ckBody.addEventListener('focusout', () => setTimeout(() => { if (stale && !typing()) { stale = false; renderCheck(); } }, 0));
+
+  // fold: a closed <details> section for reference material
+  function group(title, fold) {
+    if (fold) {
+      const det = el('details', 'group fold-group'), sum = el('summary', 'group-head');
+      sum.appendChild(el('h2', null, title)); det.appendChild(sum); ckBody.appendChild(det);
+      return det;
+    }
+    const g = el('section', 'group'), head = el('div', 'group-head');
+    head.appendChild(el('h2', null, title)); g.appendChild(head); ckBody.appendChild(g);
+    return g;
+  }
+  const boxList = item => item.boxes || [{ k: item.id }];
+  function boxesFor(key, item) {
+    const wrap = el('div', 'boxes');
+    for (const b of boxList(item)) {
+      const on = vOf(key, b.k) > 0;
+      const btn = el('button', 'box'); btn.type = 'button';
+      btn.setAttribute('aria-pressed', String(on));
+      btn.setAttribute('aria-label', item.label + (b.l ? ' ' + b.l : '') + (on ? ' 완료' : ' 미완료'));
+      btn.disabled = !writable;
+      btn.addEventListener('click', () => edit(key, d => { d.v[b.k] = on ? 0 : 1; }, true));
+      if (b.l) { const c = el('div', 'bx'); c.append(btn, el('small', null, b.l)); wrap.appendChild(c); }
+      else wrap.appendChild(btn);
+    }
+    return wrap;
+  }
+  function itemRow(key, item, extra) {
+    const list = boxList(item), dn = list.filter(b => vOf(key, b.k) > 0).length, tot = list.length;
+    const row = el('div', 'ck-row' + (dn >= tot ? ' done' : ''));
+    const what = el('div', 'what');
+    if (item.cat) what.appendChild(el('span', 'cat', item.cat));
+    what.appendChild(el('span', 'act', item.label));
+    if (item.sub) what.appendChild(el('span', 'cat', item.sub));
+    if (extra) { what.appendChild(extra); what.classList.add('free'); }
+    else if (tot === 1) what.addEventListener('click', () => edit(key, d => { d.v[list[0].k] = dn ? 0 : 1; }, true));
+    else what.classList.add('free');
+    row.append(el('span', 'dot k' + (item.color != null ? item.color : 4)), what, boxesFor(key, item));
+    return { row, dn, tot };
+  }
+  function textIn(key, path, ph, opts) {
+    opts = opts || {};
+    const f = el(opts.area ? 'textarea' : 'input', 'fld');
+    if (opts.area) f.rows = opts.rows || 2;
+    else f.type = 'text';
+    if (opts.num) f.inputMode = 'decimal';
+    if (opts.id) f.id = opts.id;
+    f.placeholder = ph || '';
+    const cur = getPath(docOf(key), path);
+    f.value = cur == null ? '' : String(cur);
+    f.disabled = !writable;
+    f.addEventListener('input', () => edit(key, d => putPath(d, path, f.value), false));
+    return f;
+  }
+  function setProg(done, total, unit) {
+    document.getElementById('ckProgText').textContent = unit + ' ' + done + '/' + total;
+    document.getElementById('ckBar').style.width = (total ? Math.round(done / total * 100) : 0) + '%';
+  }
+
+  function renderDay() {
+    const key = ckKey('day', ckDate);
+    let done = 0, total = 0;
+    const g = group('오늘 체크');
+    for (const it of plan.daily || []) {
+      const extra = it.vow ? textIn(key, 'vow') : null;
+      const r = itemRow(key, it, extra); g.appendChild(r.row); done += r.dn; total += r.tot;
+    }
+    const gm = group('식단');
+    const meals = el('div', 'meals');
+    for (const [k, l] of plan.meals || []) {
+      const lab = el('label', null, l); lab.htmlFor = 'meal-' + k;
+      meals.append(lab, textIn(key, 'meals.' + k, '', { id: 'meal-' + k }));
+    }
+    gm.appendChild(meals);
+    const gf = group('피드백');
+    const fl = el('div', 'fl');
+    fl.appendChild(textIn(key, 'note', '', { area: true, rows: 3 }));
+    gf.appendChild(fl);
+    setProg(done, total, '오늘');
+  }
+
+  function renderWeek() {
+    const key = ckKey('week', ckDate), m = monday(ckDate), days = [0, 1, 2, 3, 4, 5, 6].map(n => addDays(m, n));
+    let done = 0, total = 0;
+    const g = group('이번 주 체크');
+    for (const it of plan.weekly || []) { const r = itemRow(key, it); g.appendChild(r.row); done += r.dn; total += r.tot; }
+    const gw = group('몸무게');
+    const w = el('div', 'inline'); w.append(textIn(key, 'weight', '', { num: true }), el('span', 'note', 'kg'));
+    gw.appendChild(w);
+    const gr = group('주간 회고');
+    const fl = el('div', 'fl');
+    fl.appendChild(textIn(key, 'review.note', '', { area: true, rows: 4 }));
+    gr.appendChild(fl);
+    const gb = group('목표 진척');
+    for (const it of plan.big || []) {
+      const k = 'b_' + it.id;
+      const r = itemRow(key, { id: k, label: it.label, cat: it.cat, color: it.color, boxes: [{ k, l: '진척' }] },
+        textIn(key, 'prog.' + it.id));
+      gb.appendChild(r.row);
+    }
+    // daily records over the week, read-only
+    const gl = group('한 주 기록', true);
+    const wrap = el('div', 'wk-wrap'), t = el('table', 'wk'), thead = el('tr');
+    thead.appendChild(el('th', null, '루틴'));
+    for (const d of days) thead.appendChild(el('th', null, WD[d.getDay()]));
+    thead.appendChild(el('th', null, '달성'));
+    t.appendChild(thead);
+    for (const it of plan.daily || []) for (const b of boxList(it)) {
+      const tr = el('tr'); tr.appendChild(el('td', null, it.label + (b.l ? ' ' + b.l : '')));
+      let on = 0;
+      for (const d of days) { const v = vOf(ckKey('day', d), b.k) > 0; if (v) on++; const td = el('td'); td.appendChild(el('span', 'sq' + (v ? ' on' : ''))); tr.appendChild(td); }
+      tr.appendChild(el('td', 'rate', on + '/7'));
+      t.appendChild(tr);
+    }
+    wrap.appendChild(t); gl.appendChild(wrap);
+    const logs = el('div', 'logs');
+    for (const d of days) {
+      const x = docOf(ckKey('day', d)), ms = x.meals || {};
+      const mealTxt = (plan.meals || []).filter(([k]) => String(ms[k] || '').trim()).map(([k, l]) => l + ' ' + String(ms[k]).trim()).join(' / ');
+      const vow = String(x.vow || '').trim(), note = String(x.note || '').trim();
+      if (!mealTxt && !note && !vow) continue;
+      const item = el('div', 'log');
+      item.appendChild(el('b', null, md(d) + ' (' + WD[d.getDay()] + ')'));
+      if (vow) item.appendChild(el('span', 'lc', '다짐: ' + vow));
+      if (mealTxt) item.appendChild(el('span', null, mealTxt));
+      if (note) item.appendChild(el('span', null, note));
+      logs.appendChild(item);
+    }
+    gl.appendChild(logs);
+    if ((plan.mind || []).length) {
+      const gm = group('업무 중 습관', true);
+      const ul = el('ul'); for (const s of plan.mind) ul.appendChild(el('li', null, s));
+      gm.appendChild(ul);
+    }
+    setProg(done, total, '이번 주');
+  }
+
+  function renderMonth() {
+    const key = ckKey('month', ckDate), ym = key.slice(1);
+    let done = 0, total = 0;
+    const weeks = Object.keys(docs).filter(k => /^w\d{4}-\d{2}-\d{2}$/.test(k)).sort().filter(k => {
+      const s = k.slice(1), p = s.split('-').map(Number), sun = ymd(addDays(new Date(p[0], p[1] - 1, p[2]), 6));
+      return s.slice(0, 7) === ym || sun.slice(0, 7) === ym;
+    });
+    const wlabel = k => Number(k.slice(6, 8)) + '/' + Number(k.slice(9, 11)) + ' 주';
+    const g = group('목표');
+    for (const it of plan.big || []) {
+      const notes = weeks.map(w => [w, String((docOf(w).prog || {})[it.id] || '').trim()]).filter(([, t]) => t);
+      let extra = null;
+      if (notes.length) { extra = el('div', 'what'); for (const [w, t] of notes) extra.appendChild(el('span', 'cat', wlabel(w) + ': ' + t)); }
+      const r = itemRow(key, Object.assign({}, it, { boxes: [{ k: it.id, l: '완료' }] }), extra);
+      g.appendChild(r.row); done += r.dn; total += r.tot;
+    }
+    const ws = weeks.filter(w => String(docOf(w).weight || '').trim());
+    if (ws.length) {
+      const gw = group('몸무게', true);
+      const logs = el('div', 'logs');
+      for (const w of ws) logs.appendChild(el('div', 'log', wlabel(w) + ' · ' + String(docOf(w).weight).trim() + 'kg'));
+      gw.appendChild(logs);
+    }
+    if ((plan.hold || []).length) {
+      const gh = group('보류', true);
+      const ul = el('ul'); for (const s of plan.hold) ul.appendChild(el('li', null, s));
+      gh.appendChild(ul);
+    }
+    setProg(done, total, '목표');
+  }
+
+  function renderCheck() {
+    if (!ckBody) return;
+    ckBody.textContent = '';
+    document.getElementById('ckLabel').textContent = ckLabel();
+    if (!plan) { ckBody.appendChild(el('p', 'note', '체크 항목을 불러오는 중입니다.')); setProg(0, 0, ''); return; }
+    if (ckMode === 'day') renderDay();
+    else if (ckMode === 'week') renderWeek();
+    else renderMonth();
+  }
+  for (const b of document.querySelectorAll('.seg button')) b.addEventListener('click', () => {
+    ckMode = b.dataset.mode;
+    for (const x of document.querySelectorAll('.seg button')) x.setAttribute('aria-pressed', String(x === b));
+    renderCheck();
+  });
+  function stepDate(dir) {
+    if (ckMode === 'day') ckDate = addDays(ckDate, dir);
+    else if (ckMode === 'week') ckDate = addDays(ckDate, dir * 7);
+    else ckDate = new Date(ckDate.getFullYear(), ckDate.getMonth() + dir, 1);
+    renderCheck();
+  }
+  document.getElementById('ckPrev').addEventListener('click', () => stepDate(-1));
+  document.getElementById('ckNext').addEventListener('click', () => stepDate(1));
+  document.getElementById('ckToday').addEventListener('click', () => { ckDate = new Date(); renderCheck(); });
+  renderCheck();
+
+  function renderList(snap) {
+    const note = document.getElementById('listNote'), sum = document.getElementById('summary'), list = document.getElementById('list');
+    sum.textContent = ''; list.textContent = '';
+    const data = snap.exists ? snap.data() : null;
+    if (!data || !Array.isArray(data.items)) { note.textContent = '아직 목록이 없습니다.'; return; }
+    if (data.title) tabs.list.textContent = data.title;
+    note.textContent = ''; note.hidden = true;
+    const items = data.items, blocks = data.blocks || {};
+    const weekly = s => items.filter(i => i.slot === s).reduce((a, i) => a + (i.est || 0) * (i.perWeek || 0), 0);
+    const once = items.filter(i => i.slot === 'once');
+    const cards = [
+      ['아침', fmt(Math.round(weekly('morning') / 7)), '하루'],
+      ['퇴근 후 저녁', fmt(Math.round(weekly('evening') / 5)), '평일 하루 평균'],
+      ['자기 전', fmt(Math.round(weekly('night') / 7)), '하루'],
+      ['주말', fmt(Math.round(weekly('weekend'))), '한 주'],
+      ['이번 달 한 번', once.length + '개', fmt(once.reduce((a, i) => a + (i.est || 0), 0)) + ' + 큰 작업 ' + once.filter(i => i.big).length + '개']
+    ];
+    for (const [b, v, s] of cards) { const c = el('div', 'sum'); c.append(el('b', null, b), el('span', null, v), el('small', null, s)); sum.appendChild(c); }
+    for (const [key, name, desc] of SLOTS) {
+      const rows = items.filter(i => i.slot === key).sort((a, b) => (b.perWeek || 0) - (a.perWeek || 0) || a.color - b.color);
+      if (!rows.length) continue;
+      const g = el('section', 'group'), head = el('div', 'group-head'), h = el('h2', null, name);
+      h.appendChild(el('small', null, rows.length + '개'));
+      head.appendChild(h);
+      if (key !== 'once' && key !== 'work' && key !== 'anytime') head.appendChild(el('span', 'tot', '한 주 ' + fmt(weekly(key))));
+      g.appendChild(head);
+      for (const i of rows) {
+        const row = el('div', 'row');
+        const dot = el('span', 'dot k' + i.color); dot.title = blocks[i.color] || '';
+        const what = el('div', 'what');
+        what.append(el('span', 'cat', (blocks[i.color] || '') + (i.cat ? ' · ' + i.cat : '')), el('span', 'act', i.act));
+        const chips = el('div', 'chips');
+        chips.appendChild(el('span', 'chip', i.freq));
+        if (i.big) chips.appendChild(el('span', 'chip big', '큰 작업'));
+        else chips.appendChild(el('span', 'chip time', fmt(i.est)));
+        row.append(dot, what, chips);
+        g.appendChild(row);
+      }
+      list.appendChild(g);
+    }
+  }
+
+  // ---- sync: records travel between the phone app and the html page as one JSON bundle ----
+  // checks and cells go both ways (newer _t wins); routine, lists and meta only flow html -> app.
+  const IS_APP = !!window.__MANDALART_APP__;
+  const SIDE = IS_APP ? 'app' : 'html';
+  const TWO_WAY = ['checks', 'cells'], ONE_WAY = ['routine', 'lists', 'meta'];
+  const sx = id => document.getElementById(id);
+  sx('syncOutTitle').textContent = IS_APP ? 'html로 보내기' : '휴대폰으로 보내기';
+  sx('syncInTitle').textContent = IS_APP ? 'html에서 받기' : '휴대폰에서 받기';
+  let syncPlan = null;
+  async function collectBundle() {
+    const out = {};
+    for (const c of TWO_WAY.concat(IS_APP ? [] : ONE_WAY)) {
+      const s = await db.collection(c).get();
+      for (const d of s.docs) if (d.exists) out[c + '/' + d.id] = d.data();
+    }
+    return { kind: 'mandalart-sync', v: 1, from: SIDE, at: new Date().toISOString(), docs: out };
+  }
+  sx('syncMake').addEventListener('click', async () => {
+    if (!db) return;
+    const msg = sx('syncOutMsg'), box = sx('syncOut');
+    msg.textContent = '';
+    let text;
+    try { text = JSON.stringify(await collectBundle()); } catch (e) { msg.textContent = '기록을 읽지 못했습니다'; return; }
+    box.value = text; box.hidden = false;
+    sx('syncShare').hidden = !(IS_APP && navigator.canShare);
+    try { await navigator.clipboard.writeText(text); msg.textContent = '복사됨'; }
+    catch (_) { box.focus(); box.select(); msg.textContent = '복사 안 됨 · 길게 눌러 복사'; }
+  });
+  sx('syncShare').addEventListener('click', async () => {
+    const file = new File([sx('syncOut').value], 'mandalart-' + ymd(new Date()) + '.json', { type: 'application/json' });
+    try { if (navigator.canShare({ files: [file] })) await navigator.share({ files: [file] }); } catch (_) {}
+  });
+  sx('syncPaste').addEventListener('click', async () => {
+    try { sx('syncIn').value = await navigator.clipboard.readText(); syncPreview(); }
+    catch (_) { sx('syncIn').focus(); sx('syncInMsg').textContent = '붙여넣기 안 됨 · 칸을 길게 눌러 붙여넣기'; }
+  });
+  sx('syncFile').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    sx('syncIn').value = await f.text(); e.target.value = ''; syncPreview();
+  });
+  sx('syncIn').addEventListener('input', () => { syncPlan = null; sx('syncApply').hidden = true; sx('syncInMsg').textContent = ''; });
+  sx('syncCheck').addEventListener('click', () => syncPreview());
+  async function syncPreview() {
+    const msg = sx('syncInMsg'), apply = sx('syncApply');
+    syncPlan = null; apply.hidden = true;
+    if (!db) return;
+    let b;
+    try { b = JSON.parse(sx('syncIn').value); } catch (_) { msg.textContent = '코드를 읽을 수 없습니다'; return; }
+    if (!b || b.kind !== 'mandalart-sync' || !b.docs || typeof b.docs !== 'object') { msg.textContent = '코드를 읽을 수 없습니다'; return; }
+    if (b.from === SIDE) { msg.textContent = '이쪽에서 만든 코드입니다'; return; }
+    const plan = { add: [], upd: [], same: 0, keep: 0 };
+    for (const [path, data] of Object.entries(b.docs)) {
+      if (!/^[A-Za-z0-9_-]+\/[A-Za-z0-9_.:@+~-]+$/.test(path) || !data || typeof data !== 'object') continue;
+      const col = path.split('/')[0], oneWay = ONE_WAY.includes(col);
+      if (!oneWay && !TWO_WAY.includes(col)) continue;
+      if (oneWay && !IS_APP) continue;
+      const cur = await db.doc(path).get();
+      if (!cur.exists) { plan.add.push([path, data]); continue; }
+      const mine = cur.data() || {};
+      if (JSON.stringify(mine) === JSON.stringify(data)) { plan.same++; continue; }
+      const ti = +data._t || 0, tm = +mine._t || 0;
+      if (oneWay || ti > tm || (ti === tm && b.from === 'html')) plan.upd.push([path, data]); else plan.keep++;
+    }
+    const t = new Date(b.at);
+    const when = isNaN(t) ? '' : (t.getMonth() + 1) + '/' + t.getDate() + ' ' + pad(t.getHours()) + ':' + pad(t.getMinutes()) + ' 코드 · ';
+    msg.textContent = when + '새로 ' + plan.add.length + ' · 갱신 ' + plan.upd.length + ' · 같음 ' + plan.same + ' · 이쪽이 최신 ' + plan.keep;
+    if (plan.add.length || plan.upd.length) { syncPlan = plan; apply.hidden = false; }
+  }
+  sx('syncApply').addEventListener('click', async () => {
+    const plan = syncPlan, msg = sx('syncInMsg'), apply = sx('syncApply');
+    if (!plan || !db) return;
+    apply.disabled = true;
+    let n = 0;
+    try { for (const [path, data] of plan.add.concat(plan.upd)) { await db.doc(path).set(data); n++; } msg.textContent = n + '개 반영됨'; }
+    catch (e) { msg.textContent = n + '개 반영 후 멈춤: 연결 확인'; }
+    apply.disabled = false; apply.hidden = true; syncPlan = null; sx('syncIn').value = '';
+  });
+
+  updateStats();
+  (async () => {
+    if (!window.claude || !window.claude.use) { setStatus('offline'); return; }
+    const [dbNs, user] = await Promise.all([window.claude.use('db'), window.claude.use('user')]);
+    if (!dbNs) { setStatus('offline'); makeReadOnly(); statusEl.textContent = '저장 불가'; return; }
+    db = dbNs;
+    if (user) { try { const w = await user.can('data.write'); if (w === false) makeReadOnly(); } catch (_) {} }
+    db.collection('cells').onSnapshot(applySnapshot, () => setStatus('error'));
+    db.doc('routine/2026-10').onSnapshot(s => { plan = s.exists ? s.data() : null; if (typing()) stale = true; else renderCheck(); }, () => {});
+    db.collection('checks').onSnapshot(applyChecks, () => { ckSave.textContent = '기록을 불러오지 못했습니다'; });
+    db.doc('lists/2026-10').onSnapshot(renderList, () => {
+      document.getElementById('listNote').textContent = '목록을 불러오지 못했습니다. 잠시 뒤 다시 열어 주세요.';
+    });
+    db.doc('meta/sheet').onSnapshot(s => {
+      const p = s.exists ? String((s.data() || {}).period || '') : '';
+      document.getElementById('period').textContent = p;
+    }, () => {});
+  })();
+})();
+</script>
+
+</body></html>
