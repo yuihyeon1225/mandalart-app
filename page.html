@@ -267,6 +267,7 @@ button.mode { border-radius: 0; background: none; border: 1px solid var(--fg); }
 .sync-row { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
 .sbtn { font: inherit; font-size: 0.88rem; min-height: 40px; padding: 0 14px; display: inline-flex; align-items: center;
   border: 1px solid var(--line); border-radius: 0; background: none; color: var(--fg); cursor: pointer; }
+.sbtn[href] { text-decoration: none; }
 .sbtn.main { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 .sbtn:disabled { opacity: .5; }
 .fld.code { font-size: 12px; line-height: 1.5; word-break: break-all; border: 1px solid var(--line); background: none; padding: 8px; min-height: 0; }
@@ -308,7 +309,7 @@ button.mode { border-radius: 0; background: none; border: 1px solid var(--fg); }
   <section class="view" id="view-sync" hidden>
     <section class="group">
       <div class="group-head"><h2 id="syncOutTitle">보내기</h2></div>
-      <div class="sync-row"><button class="sbtn" type="button" id="syncMake">코드 만들기</button><button class="sbtn" type="button" id="syncShare" hidden>파일로 공유</button></div>
+      <div class="sync-row"><button class="sbtn" type="button" id="syncMake">코드 만들기</button><button class="sbtn" type="button" id="syncShare" hidden>파일로 공유</button><a class="sbtn" id="syncOther" target="_blank" rel="noopener"></a></div>
       <textarea class="fld code" id="syncOut" rows="3" readonly hidden></textarea>
       <p class="note" id="syncOutMsg"></p>
     </section>
@@ -808,6 +809,9 @@ button.mode { border-radius: 0; background: none; border: 1px solid var(--fg); }
   const sx = id => document.getElementById(id);
   sx('syncOutTitle').textContent = IS_APP ? 'html로 보내기' : '휴대폰으로 보내기';
   sx('syncInTitle').textContent = IS_APP ? 'html에서 받기' : '휴대폰에서 받기';
+  // the other side's address: the app opens the artifact, the artifact opens the app
+  sx('syncOther').href = IS_APP ? 'https://claude.ai/artifact/VhyJWLEQtycq8KMZ6AHQ2P' : 'https://yuihyeon1225.github.io/mandalart-app/';
+  sx('syncOther').textContent = IS_APP ? 'html 열기' : '앱 열기';
   let syncPlan = null;
   async function collectBundle() {
     const out = {};
